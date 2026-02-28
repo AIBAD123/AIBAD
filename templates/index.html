@@ -1,0 +1,264 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2 class="mb-4 fw-bold">AI Business Analytics Dashboard</h2>
+
+<!-- FORM NHẬP DỮ LIỆU -->
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="mb-3">Thêm dữ liệu kinh doanh</h5>
+
+    <form method="POST">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <input name="month" type="number" min="1" max="12"
+                       class="form-control" placeholder="Tháng (1-12)" required>
+            </div>
+
+            <div class="col-md-3">
+                <input name="cost" type="number" step="0.01"
+                       class="form-control" placeholder="Vốn bỏ ra" required>
+            </div>
+
+            <div class="col-md-3">
+                <input name="customers" type="number"
+                       class="form-control" placeholder="Số khách hàng" required>
+            </div>
+
+            <div class="col-md-3">
+                <!-- ĐỔI revenue ➜ thu_vao -->
+                <input name="thu_vao" type="number" step="0.01"
+                       class="form-control" placeholder="Số tiền thu vào" required>
+            </div>
+        </div>
+
+        <button class="btn btn-dark w-100 mt-3">Thêm dữ liệu</button>
+    </form>
+
+    <!-- NÚT XÓA TOÀN BỘ -->
+    <a href="/clear">
+        <button type="button" class="btn btn-danger w-100 mt-2">
+            XÓA TOÀN BỘ DỮ LIỆU
+        </button>
+    </a>
+</div>
+
+
+{% if data and data|length > 0 %}
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="mb-3">Biểu đồ chi tiết kinh doanh</h5>
+    <canvas id="businessChart"></canvas>
+</div>
+
+<script>
+const months = {{ data|map(attribute=1)|list|tojson }};
+const revenues = {{ data|map(attribute=4)|list|tojson }};
+const costs = {{ data|map(attribute=2)|list|tojson }};
+const customers = {{ data|map(attribute=3)|list|tojson }};
+
+new Chart(document.getElementById('businessChart'), {
+    type: 'line',
+    data: {
+        labels: months,
+        datasets: [
+            {
+                label: 'Thu vào',
+                data: revenues,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: false
+            },
+            {
+                label: 'Chi phí',
+                data: costs,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: false
+            },
+            {
+                label: 'Số khách',
+                data: customers,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+
+{% if data and data|length > 0 %}
+
+<!-- BẢNG DOANH THU -->
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="mb-3">Bảng doanh thu (%)</h5>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tháng</th>
+                <th>Chi phí</th>
+                <th>Thu vào</th>
+                <th>Lợi nhuận (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            {% set loi_nhuan = row[4] - row[2] %}
+            {% if row[2] > 0 %}
+                {% set phan_tram = (loi_nhuan / row[2]) * 100 %}
+            {% else %}
+                {% set phan_tram = 0 %}
+            {% endif %}
+            <tr>
+                <td>{{ row[1] }}</td>
+                <td>{{ "{:,.0f}".format(row[2]) }}</td>
+                <td>{{ "{:,.0f}".format(row[4]) }}</td>
+                <td>
+                    {% if phan_tram >= 0 %}
+                        <span class="text-success">{{ "%.1f"|format(phan_tram) }}%</span>
+                    {% else %}
+                        <span class="text-danger">{{ "%.1f"|format(phan_tram) }}%</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<!-- BIỂU ĐỒ SỐ LƯỢNG KHÁCH -->
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="mb-3">Biểu đồ số lượng khách hàng</h5>
+    <canvas id="customerChart"></canvas>
+</div>
+
+<script>
+const customerMonths = {{ data|map(attribute=1)|list|tojson }};
+const customerData = {{ data|map(attribute=3)|list|tojson }};
+
+new Chart(document.getElementById('customerChart'), {
+    type: 'bar',
+    data: {
+        labels: customerMonths,
+        datasets: [{
+            label: 'Số lượng khách',
+            data: customerData,
+            borderWidth: 3,
+            tension: 0.4,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+
+{% endif %}
+<!-- BIỂU ĐỒ -->{% if prediction is not none %}
+<div class="card shadow-sm p-4 mb-4">
+    <canvas id="chart"></canvas>
+</div>
+{% endif %}
+
+<!-- MODEL -->
+{% if prediction is not none %}
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="mb-3">Model Performance</h5>
+    <p>R² Score: <strong>{{ accuracy }}</strong></p>
+    <p>
+        Dự đoán thu vào tháng {{ next_month }}:
+        <strong class="text-success">{{ prediction }}</strong>
+    </p>
+</div>
+{% endif %}
+
+
+<!-- TRẠNG THÁI KINH DOANH -->
+{% if canh_bao or trend_khach %}
+<div class="card shadow-sm p-4 mb-4 border-warning">
+    <h5 class="fw-bold">Trạng thái kinh doanh</h5>
+
+    {% if canh_bao %}
+        <p class="mb-2 text-danger">{{ canh_bao }}</p>
+    {% endif %}
+
+    {% if trend_khach %}
+        <p class="mb-0">
+            {% if "TĂNG" in trend_khach %}
+                <span class="text-success fw-bold">{{ trend_khach }}</span>
+            {% elif "GIẢM" in trend_khach %}
+                <span class="text-danger fw-bold">{{ trend_khach }}</span>
+            {% else %}
+                <span class="text-secondary fw-bold">{{ trend_khach }}</span>
+            {% endif %}
+        </p>
+    {% endif %}
+</div>
+{% endif %}
+
+
+<!-- CHART SCRIPT -->
+{% if data and data|length > 0 %}
+<script>
+const months = {{ data|map(attribute=1)|list|tojson }};
+const revenues = {{ data|map(attribute=4)|list|tojson }};
+const prediction = {{ prediction if prediction is not none else "null" }};
+const nextMonth = {{ next_month if next_month else "null" }};
+
+let chartLabels = [...months];
+let chartData = [...revenues];
+
+if (prediction !== null) {
+    chartLabels.push(nextMonth);
+    chartData.push(prediction);
+}
+
+new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+        labels: chartLabels,
+        datasets: [{
+            label: 'Thu vào (Thực tế + Dự đoán)',
+            data: chartData,
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endif %}
+
+{% endblock %}

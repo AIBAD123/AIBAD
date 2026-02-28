@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Business Analytics Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f5f7fa;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .card-title {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .stat-number {
+            font-size: 26px;
+            font-weight: 600;
+            color: #1e88e5;
+        }
+
+        .ai-box {
+            background: #ffffff;
+            border-left: 4px solid #1e88e5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .table {
+            background: white;
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            background-color: #1e88e5;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #1669bb;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg px-4">
+    <a class="navbar-brand fw-bold text-primary" href="/">AI BAD</a>
+    <div class="ms-auto">
+        <a href="/dashboard" class="btn btn-sm btn-outline-primary me-2">Dashboard</a>
+        <a href="/san_pham" class="btn btn-sm btn-outline-primary me-2">Sản phẩm</a>
+        <a href="/nhap_hang" class="btn btn-sm btn-outline-primary me-2">Nhập hàng</a>
+        <a href="/ban_hang" class="btn btn-sm btn-outline-primary">Bán hàng</a>
+
+        <a href="{{ url_for('logout') }}" 
+            style="background:red;color:white;padding:6px 12px;text-decoration:none;border-radius:5px;">
+            Đăng xuất
+        </a>
+    </div>
+</nav>
+
+<div class="container py-4">
+    {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h4 class="mb-4 fw-semibold">Tổng quan hệ thống</h4>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small">Doanh thu tháng {{ last_month }}</div>
+            <div class="fs-4 fw-semibold text-primary">
+                {{ revenues[-1] if revenues else 0 }} đ
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small">Lợi nhuận tháng {{ last_month }}</div>
+            <div class="fs-4 fw-semibold text-success">
+                {{ profit }} đ
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small">Tổng tồn kho</div>
+            <div class="fs-4 fw-semibold">
+                {{ total_stock }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small">Số sản phẩm</div>
+            <div class="fs-4 fw-semibold">
+                {{ product_count }}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- BIỂU ĐỒ DOANH THU -->
+<div class="card p-4 mb-4">
+    <div class="text-muted mb-3">Doanh thu theo tháng</div>
+    <canvas id="revenueChart"></canvas>
+</div>
+
+<!-- AI BOX -->
+<div class="card p-4">
+    <div class="text-muted mb-3">Phân tích AI</div>
+
+    {% if alerts %}
+        <ul>
+            {% for a in alerts %}
+                <li>{{ a }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">Không có cảnh báo tồn kho.</p>
+    {% endif %}
+
+    {% if top_product %}
+        <hr>
+        <p class="mb-0">
+            Sản phẩm dự đoán bán mạnh tháng tới:
+            <strong class="text-primary">
+                {{ top_product[0] }}
+            </strong>
+            ({{ top_product[1]|round(1) }})
+        </p>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('revenueChart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ months|tojson }},
+        datasets: [{
+            data: {{ revenues|tojson }},
+            borderColor: '#1e88e5',
+            backgroundColor: 'rgba(30,136,229,0.05)',
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+
+{% endblock %}

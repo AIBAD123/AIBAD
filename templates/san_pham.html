@@ -1,0 +1,32 @@
+<h2>Thêm Sản Phẩm</h2>
+{% if error %}
+<div style="color:red; margin-bottom:10px;">
+    {{ error }}
+</div>
+{% endif %}
+<form method="POST">
+    Tên: <input name="name"><br>
+    Hạn sử dụng (tháng - để trống nếu không có):
+    <input name="shelf_life"><br>
+    Giá nhập: <input name="import_price"><br>
+    Giá bán: <input name="sell_price"><br>
+    <button>Thêm</button>
+</form>
+
+<h3>Danh sách sản phẩm</h3>
+
+{% for p in products %}
+<p>
+    {{ p.name }} |
+    Giá nhập: {{ p.import_price }} |
+    Giá bán: {{ p.sell_price }} |
+    Số lượng tồn:
+    {% if p.stock <= 5 %}
+        <span style="color:red">{{ p.stock }}</span>
+    {% else %}
+        {{ p.stock }}
+    {% endif %}
+</p>
+{% endfor %}
+
+<a href="/dashboard">Dashboard</a>
