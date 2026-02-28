@@ -10,6 +10,7 @@ app.secret_key = "super_secret_key_123"
 
 DB = "data.db"
 
+init_db() 
 
 # ================= DATABASE =================
 def init_db():
@@ -453,5 +454,4 @@ def dashboard():
 
 
 if __name__ == "__main__":
-    init_db()
     app.run()
