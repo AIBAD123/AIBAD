@@ -10,8 +10,6 @@ app.secret_key = "super_secret_key_123"
 
 DB = "data.db"
 
-init_db() 
-
 # ================= DATABASE =================
 def init_db():
     conn = sqlite3.connect(DB)
@@ -452,6 +450,8 @@ def dashboard():
         product_count=len(product_ids)
     )
 
+with app.app_context():
+    init_db()
 
 if __name__ == "__main__":
     app.run()
